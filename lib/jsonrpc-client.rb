@@ -1,0 +1,1 @@
+require 'jsonrpc/client'

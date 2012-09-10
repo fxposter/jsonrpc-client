@@ -23,22 +23,31 @@ module JSONRPC
     end
 
     describe "#invoke" do
-      before(:each) do
-        expected = MultiJson.encode({
+      let(:expected) { MultiJson.encode({
          'jsonrpc' => '2.0',
          'method'  => 'foo',
          'params'  => [1,2,3],
          'id'      => 1
         })
+      }
+
+      before(:each) do
         response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-        Faraday.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         @client = Client.new(SPEC_URL)
       end
 
       context "when using an array of args" do
         it "sends a request with the correct method and args" do
+          Faraday.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
           @client.invoke('foo', [1, 2, 3]).should == 42
+        end
+      end
+
+      context "with headers" do
+        it "adds additional headers" do
+          Faraday.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json', "X-FOO" => "BAR"}).and_return(@resp_mock)
+          @client.invoke('foo', [1, 2, 3], "X-FOO" => "BAR").should == 42
         end
       end
     end

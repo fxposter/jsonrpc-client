@@ -104,8 +104,8 @@ module JSONRPC
       invoke(method, args)
     end
 
-    def invoke(method, args)
-      resp = send_single_request(method.to_s, args)
+    def invoke(method, args, options = nil)
+      resp = send_single_request(method.to_s, args, options)
 
       begin
         data = ::MultiJson.decode(resp)
@@ -120,14 +120,14 @@ module JSONRPC
     end
 
     private
-    def send_single_request(method, args)
+    def send_single_request(method, args, options)
       post_data = ::MultiJson.encode({
         'jsonrpc' => JSON_RPC_VERSION,
         'method'  => method,
         'params'  => args,
         'id'      => ::JSONRPC::Base.make_id
       })
-      resp = ::Faraday.post(@url, post_data, @opts)
+      resp = ::Faraday.post(@url, post_data, (options || {}).merge(@opts))
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise ::JSONRPC::Error::InvalidResponse.new
       end

@@ -122,7 +122,7 @@ module JSONRPC
     private
     def send_single_request(method, args, options)
       post_data = ::MultiJson.encode({
-        'jsonrpc' => JSON_RPC_VERSION,
+        'jsonrpc' => ::JSONRPC::Base::JSON_RPC_VERSION,
         'method'  => method,
         'params'  => args,
         'id'      => ::JSONRPC::Base.make_id
@@ -149,16 +149,16 @@ module JSONRPC
 
     def valid_response?(data)
       return false if !data.is_a?(::Hash)
-      return false if data['jsonrpc'] != JSON_RPC_VERSION
+      return false if data['jsonrpc'] != ::JSONRPC::Base::JSON_RPC_VERSION
       return false if !data.has_key?('id')
       return false if data.has_key?('error') && data.has_key?('result')
 
       if data.has_key?('error')
-        if !data['error'].is_a?(Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message')
+        if !data['error'].is_a?(::Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message')
           return false
         end
 
-        if !data['error']['code'].is_a?(Fixnum) || !data['error']['message'].is_a?(String)
+        if !data['error']['code'].is_a?(::Fixnum) || !data['error']['message'].is_a?(::String)
           return false
         end
       end

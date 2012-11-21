@@ -6,6 +6,14 @@ require 'jsonrpc/error'
 require 'jsonrpc/version'
 
 module JSONRPC
+  def self.logger=(logger)
+    @logger = logger
+  end
+
+  def self.logger
+    @logger
+  end
+
   class Base < BasicObject
     JSON_RPC_VERSION = '2.0'
 
@@ -61,7 +69,10 @@ module JSONRPC
   private
     def send_batch_request(batch)
       post_data = ::MultiJson.encode(batch)
-      resp = ::Faraday.post(@url, post_data, @opts)
+      resp = ::Faraday.new { |connection|
+        connection.response :logger, ::JSONRPC.logger
+        connection.adapter ::Faraday.default_adapter
+      }.post(@url, post_data, @opts)
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise ::JSONRPC::Error::InvalidResponse.new
       end
@@ -127,7 +138,11 @@ module JSONRPC
         'params'  => args,
         'id'      => ::JSONRPC::Base.make_id
       })
-      resp = ::Faraday.post(@url, post_data, (options || {}).merge(@opts))
+      resp = ::Faraday.new { |connection|
+        connection.response :logger, ::JSONRPC.logger
+        connection.adapter ::Faraday.default_adapter
+      }.post(@url, post_data, (options || {}).merge(@opts))
+
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise ::JSONRPC::Error::InvalidResponse.new
       end

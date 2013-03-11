@@ -14,6 +14,16 @@ module JSONRPC
     @logger
   end
 
+  def self.decode_options=(options)
+    @decode_options = options
+  end
+
+  def self.decode_options
+    @decode_options
+  end
+
+  @decode_options = {}
+
   class Base < BasicObject
     JSON_RPC_VERSION = '2.0'
 
@@ -100,7 +110,7 @@ module JSONRPC
       response = send_batch_request(batch)
 
       begin
-        responses = ::MultiJson.decode(response)
+        responses = ::MultiJson.decode(response, ::JSONRPC.decode_options)
       rescue
         raise ::JSONRPC::Error::InvalidJSON.new(json)
       end
@@ -119,7 +129,7 @@ module JSONRPC
       resp = send_single_request(method.to_s, args, options)
 
       begin
-        data = ::MultiJson.decode(resp)
+        data = ::MultiJson.decode(resp, ::JSONRPC.decode_options)
       rescue
         raise ::JSONRPC::Error::InvalidJSON.new(resp)
       end

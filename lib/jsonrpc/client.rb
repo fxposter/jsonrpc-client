@@ -33,6 +33,8 @@ module JSONRPC
 
     def initialize(url, opts = {})
       @url = ::URI.parse(url).to_s
+      @username = opts.delete(:username)
+      @password = opts.delete(:password)
       @opts = opts
       @opts[:content_type] ||= 'application/json'
     end
@@ -150,6 +152,7 @@ module JSONRPC
       })
       resp = ::Faraday.new { |connection|
         connection.response :logger, ::JSONRPC.logger
+        connection.request :basic_auth, @username, @password if @username && @password
         connection.adapter ::Faraday.default_adapter
       }.post(@url, post_data, (options || {}).merge(@opts))
 

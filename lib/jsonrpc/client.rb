@@ -24,6 +24,28 @@ module JSONRPC
 
   @decode_options = {}
 
+  class Helper
+    def initialize(options)
+      @options = options
+      @options[:content_type] ||= 'application/json'
+    end
+
+    def options(additional_options = nil)
+      if additional_options
+        additional_options.merge(@options)
+      else
+        @options
+      end
+    end
+
+    def connection
+      @options[:connection] || ::Faraday.new { |connection|
+        connection.response :logger, ::JSONRPC.logger
+        connection.adapter ::Faraday.default_adapter
+      }
+    end
+  end
+
   class Base < BasicObject
     JSON_RPC_VERSION = '2.0'
 
@@ -33,8 +55,7 @@ module JSONRPC
 
     def initialize(url, opts = {})
       @url = ::URI.parse(url).to_s
-      @opts = opts
-      @opts[:content_type] ||= 'application/json'
+      @helper = ::JSONRPC::Helper.new(opts)
     end
 
     def to_s
@@ -79,10 +100,7 @@ module JSONRPC
   private
     def send_batch_request(batch)
       post_data = ::MultiJson.encode(batch)
-      resp = ::Faraday.new { |connection|
-        connection.response :logger, ::JSONRPC.logger
-        connection.adapter ::Faraday.default_adapter
-      }.post(@url, post_data, @opts)
+      resp = @helper.connection.post(@url, post_data, @helper.options)
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise ::JSONRPC::Error::InvalidResponse.new
       end
@@ -148,10 +166,7 @@ module JSONRPC
         'params'  => args,
         'id'      => ::JSONRPC::Base.make_id
       })
-      resp = ::Faraday.new { |connection|
-        connection.response :logger, ::JSONRPC.logger
-        connection.adapter ::Faraday.default_adapter
-      }.post(@url, post_data, (options || {}).merge(@opts))
+      resp = @helper.connection.post(@url, post_data, @helper.options(options))
 
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise ::JSONRPC::Error::InvalidResponse.new

@@ -5,8 +5,8 @@ module JSONRPC
     BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}
 
     before(:each) do
-      @resp_mock = mock('http_response')
-      Base.stub!(:make_id).and_return(1)
+      @resp_mock = double('http_response')
+      Base.stub(:make_id).and_return(1)
     end
 
     after(:each) do
@@ -104,7 +104,7 @@ module JSONRPC
           {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
         ])
 
-        Base.stub!(:make_id).and_return('1', '2', '5', '9')
+        Base.stub(:make_id).and_return('1', '2', '5', '9')
         Faraday::Connection.any_instance.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL)

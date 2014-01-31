@@ -1,6 +1,6 @@
 # JSONRPC::Client
 
-TODO: Write a gem description
+Simple JSON-RPC 2.0 client implementation. See the [specification](http://www.jsonrpc.org/specification).
 
 ## Installation
 
@@ -18,7 +18,10 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+client = JSONRPC::Client.new('http://example.com')
+client.add_numbers(1, 2, 3)
+```
 
 ## Contributing
 

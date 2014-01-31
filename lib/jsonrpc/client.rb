@@ -28,6 +28,7 @@ module JSONRPC
     def initialize(options)
       @options = options
       @options[:content_type] ||= 'application/json'
+      @connection = @options.delete(:connection)
     end
 
     def options(additional_options = nil)
@@ -39,7 +40,7 @@ module JSONRPC
     end
 
     def connection
-      @options[:connection] || ::Faraday.new { |connection|
+      @connection || ::Faraday.new { |connection|
         connection.response :logger, ::JSONRPC.logger
         connection.adapter ::Faraday.default_adapter
       }

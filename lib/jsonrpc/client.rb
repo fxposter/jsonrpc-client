@@ -141,10 +141,15 @@ module JSONRPC
 
   class Client < Base
     def method_missing(method, *args, &block)
+      if method.to_s.end_with?('_np!') # _np! stands for named parameters
+        args = args.first
+        method = method.to_s.gsub(/\_np\!$/, '')
+      end
       invoke(method, args)
     end
 
     def invoke(method, args, options = nil)
+      # XXX args = args.first if args.class.to_s == 'Array' && args.length == 1 && args.first.class.to_s == 'Hash'
       resp = send_single_request(method.to_s, args, options)
 
       begin

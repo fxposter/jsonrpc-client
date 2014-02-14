@@ -63,6 +63,12 @@ module JSONRPC
                        'params'  => [1,2,3],
                        'id'      => 1
           })
+          @named_params = MultiJson.encode({
+                       'jsonrpc' => '2.0',
+                       'method'  => 'foo',
+                       'params'  => {:p1 => 1, :p2 => 2, :p3 => 3},
+                       'id'      => 1
+          })
         end
         it "sends a valid JSON-RPC request and returns the result" do
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
@@ -70,6 +76,14 @@ module JSONRPC
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL, :connection => connection)
           client.foo(1,2,3).should == 42
+        end
+
+        it "sends a valid JSON-RPC request and returns the result" do
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          connection.should_receive(:post).with(SPEC_URL, @named_params, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL, :connection => connection)
+          client.foo_np!({:p1 => 1, :p2 => 2, :p3 => 3}).should == 42
         end
 
         it "sends a valid JSON-RPC request with custom options" do

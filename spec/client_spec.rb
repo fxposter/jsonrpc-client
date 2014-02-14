@@ -83,7 +83,8 @@ module JSONRPC
           connection.should_receive(:post).with(SPEC_URL, @named_params, {:content_type => 'application/json'}).and_return(@resp_mock)
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL, :connection => connection)
-          client.foo_np!({:p1 => 1, :p2 => 2, :p3 => 3}).should == 42
+          result = client.foo({:p1 => 1, :p2 => 2, :p3 => 3}) { |op| op['named_params'] = true }
+          result.should == 42
         end
 
         it "sends a valid JSON-RPC request with custom options" do

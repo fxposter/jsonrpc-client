@@ -90,6 +90,7 @@ module JSONRPC
     end
 
     def method_missing(sym, *args, &block)
+      args = args.first if args.length == 1
       if @alive
         request = ::JSONRPC::Request.new(sym.to_s, args)
         push_batch_request(request)
@@ -141,15 +142,11 @@ module JSONRPC
 
   class Client < Base
     def method_missing(method, *args, &block)
-      options = {}
-      yield(options) if block
-      invoke(method, args, options)
+      args = args.first if args.length == 1
+      invoke(method, args)
     end
 
     def invoke(method, args, options = nil)
-      if options.class.to_s == 'Hash' && options.delete('named_params') === true && args.class.to_s == 'Array'
-          args = args.first
-      end
       resp = send_single_request(method.to_s, args, options)
 
       begin

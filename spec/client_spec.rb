@@ -83,7 +83,7 @@ module JSONRPC
           connection.should_receive(:post).with(SPEC_URL, @named_params, {:content_type => 'application/json'}).and_return(@resp_mock)
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL, :connection => connection)
-          result = client.foo({:p1 => 1, :p2 => 2, :p3 => 3}) { |op| op['named_params'] = true }
+          result = client.foo({:p1 => 1, :p2 => 2, :p3 => 3})
           result.should == 42
         end
 
@@ -110,7 +110,7 @@ module JSONRPC
         batch = MultiJson.encode([
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
-          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"}
         ])
 

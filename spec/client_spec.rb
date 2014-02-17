@@ -110,6 +110,7 @@ module JSONRPC
         batch = MultiJson.encode([
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
+          {"jsonrpc" => "2.0", "method" => "hello", "params" => ['world'], "id" => "3"},
           {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"}
         ])
@@ -117,11 +118,12 @@ module JSONRPC
         response = MultiJson.encode([
           {"jsonrpc" => "2.0", "result" => 7, "id" => "1"},
           {"jsonrpc" => "2.0", "result" => 19, "id" => "2"},
+          {"jsonrpc" => "2.0", "result" => 'world', "id" => "3"},
           {"jsonrpc" => "2.0", "error" => {"code" => -32601, "message" => "Method not found."}, "id" => "5"},
           {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
         ])
 
-        Base.stub(:make_id).and_return('1', '2', '5', '9')
+        Base.stub(:make_id).and_return('1', '2', '3', '5', '9')
         connection.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL, :connection => connection)
@@ -130,6 +132,7 @@ module JSONRPC
         client = BatchClient.new(SPEC_URL, :connection => connection) do |batch|
           sum = batch.sum(1,2,4)
           subtract = batch.subtract(42,23)
+          str = batch.hello('world')
           foo = batch.foo_get('name' => 'myself')
           data = batch.get_data
         end

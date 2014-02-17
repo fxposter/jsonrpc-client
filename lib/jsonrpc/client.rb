@@ -90,7 +90,7 @@ module JSONRPC
     end
 
     def method_missing(sym, *args, &block)
-      args = args.first if args.length == 1
+      args = args.first if args.length == 1 && (args.first.is_a?(::Array) || args.first.is_a?(::Hash))
       if @alive
         request = ::JSONRPC::Request.new(sym.to_s, args)
         push_batch_request(request)
@@ -142,7 +142,7 @@ module JSONRPC
 
   class Client < Base
     def method_missing(method, *args, &block)
-      args = args.first if args.length == 1
+      args = args.first if args.length == 1 && (args.first.is_a?(::Array) || args.first.is_a?(::Hash))
       invoke(method, args)
     end
 

@@ -13,11 +13,11 @@ module JSONRPC
     end
 
     class ServerError < StandardError
-      attr_reader :code, :message
+      attr_reader :code, :response_error
 
       def initialize(code, message)
         @code = code
-        @message = message
+        @response_error = message
         super("Server error #{code}: #{message}")
       end
     end

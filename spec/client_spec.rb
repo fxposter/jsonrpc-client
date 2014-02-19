@@ -113,6 +113,7 @@ module JSONRPC
           {"jsonrpc" => "2.0", "method" => "hello", "params" => ['world'], "id" => "3"},
           {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "foo", "params" => [[1,2,3]], "id" => "7"},
+          {"jsonrpc" => "2.0", "method" => "foo", "params" => {:some => { :nested => :hash }}, "id" => "8"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"}
         ])
 
@@ -122,10 +123,11 @@ module JSONRPC
           {"jsonrpc" => "2.0", "result" => 'world', "id" => "3"},
           {"jsonrpc" => "2.0", "error" => {"code" => -32601, "message" => "Method not found."}, "id" => "5"},
           {"jsonrpc" => "2.0", "result" => [2,4,6], "id" => "7"},
+          {"jsonrpc" => "2.0", "result" => "I can handle this!", "id" => "8"},
           {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
         ])
 
-        Base.stub(:make_id).and_return('1', '2', '3', '5', '7', '9')
+        Base.stub(:make_id).and_return('1', '2', '3', '5', '7', '8', '9')
         connection.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL, :connection => connection)
@@ -137,6 +139,7 @@ module JSONRPC
           str = batch.hello('world')
           foo = batch.foo_get('name' => 'myself')
           arr = batch.foo([1,2,3])
+          nested = batch.foo({:some => { :nested => :hash }})
           data = batch.get_data
         end
 

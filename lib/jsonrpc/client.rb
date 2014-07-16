@@ -55,6 +55,9 @@ module JSONRPC
     end
 
     def initialize(url, opts = {})
+      @validate_response = opts.delete(:validate_response)
+      @validate_response = true if @validate_response.nil?
+
       @url = ::URI.parse(url).to_s
       @helper = ::JSONRPC::Helper.new(opts)
     end
@@ -189,6 +192,8 @@ module JSONRPC
     end
 
     def valid_response?(data)
+      return true unless @validate_response
+
       return false if !data.is_a?(::Hash)
       return false if data['jsonrpc'] != ::JSONRPC::Base::JSON_RPC_VERSION
       return false if !data.has_key?('id')

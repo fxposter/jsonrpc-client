@@ -104,7 +104,7 @@ module JSONRPC
 
     def method_missing(sym, *args, &block)
       if @alive
-        if @helper.named_params? && args.first.is_a?(::Hash)
+        if @helper.named_params? && args.size == 1 && args.first.is_a?(::Hash)
           request = ::JSONRPC::Request.new(sym.to_s, *args)
         else
           request = ::JSONRPC::Request.new(sym.to_s, args)
@@ -158,7 +158,7 @@ module JSONRPC
 
   class Client < Base
     def method_missing(method, *args, &block)
-      if @helper.named_params? && args.first.is_a?(::Hash)
+      if @helper.named_params? && args.size == 1 && args.first.is_a?(::Hash)
         invoke(method, *args)
       else
         invoke(method, args)

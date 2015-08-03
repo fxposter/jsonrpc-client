@@ -1,5 +1,6 @@
 require 'multi_json'
 require 'faraday'
+require 'uri'
 require 'jsonrpc/request'
 require 'jsonrpc/response'
 require 'jsonrpc/error'

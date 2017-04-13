@@ -23,6 +23,22 @@ client = JSONRPC::Client.new('http://example.com')
 client.add_numbers(1, 2, 3)
 ```
 
+### Passing a customized connection
+
+By default, the client uses a plain Faraday connection with Faraday's default adapter to connect to the JSON-RPC endpoint. If you wish to customize this connection, you can pass your own Faraday object into the constructor. In this example, SSL verification is disabled and HTTP Basic Authentication is used:
+
+```ruby
+connection = Faraday.new { |connection|
+  connection.adapter Faraday.default_adapter
+  connection.ssl.verify = false  # This is a baaaad idea!
+  connection.basic_auth('username', 'password')
+}
+client = JSONRPC::Client.new("http://example.com", { connection: connection })
+```
+
+More information about Faraday is available at [that project's GitHub page](https://github.com/lostisland/faraday).
+
+
 ## Contributing
 
 1. Fork it

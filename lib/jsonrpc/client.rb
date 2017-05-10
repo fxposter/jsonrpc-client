@@ -191,11 +191,9 @@ module JSONRPC
 
     def valid_response?(data)
       return false if !data.is_a?(::Hash)
-      return false if data['jsonrpc'] != ::JSONRPC::Base::JSON_RPC_VERSION
       return false if !data.has_key?('id')
-      return false if data.has_key?('error') && data.has_key?('result')
 
-      if data.has_key?('error')
+      if data['error']
         if !data['error'].is_a?(::Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message')
           return false
         end

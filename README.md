@@ -35,6 +35,15 @@ connection = Faraday.new { |connection|
 }
 client = JSONRPC::Client.new("http://example.com", { connection: connection })
 ```
+[Faraday](https://www.rubydoc.info/gems/faraday/Faraday) API may have change, depending on installed version ; with version >= 2.7.10, you need to call for basic-authentification [set_basic_auth](https://www.rubydoc.info/gems/faraday/Faraday%2FConnection:set_basic_auth) method.
+```ruby
+connection = Faraday.new { |connection|
+  connection.adapter Faraday.default_adapter
+  connection.ssl.verify = false  # This is a baaaad idea!
+  connection.set_basic_auth('username', 'password')
+}
+client = JSONRPC::Client.new("http://example.com", { connection: connection })
+```
 
 More information about Faraday is available at [that project's GitHub page](https://github.com/lostisland/faraday).
 

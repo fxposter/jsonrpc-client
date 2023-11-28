@@ -26,10 +26,23 @@ module JSONRPC
   @decode_options = {}
 
   class Helper
+    NAMED = :named
+    POSITIONAL = :positional
+
     def initialize(options)
       @options = options
       @options[:content_type] ||= 'application/json'
+      @params_type = POSITIONAL
+      @params_type = NAMED if @options.delete(:named_params) == true
       @connection = @options.delete(:connection)
+    end
+
+    def positional_params?
+      @params_type == POSITIONAL
+    end
+
+    def named_params?
+      @params_type == NAMED
     end
 
     def options(additional_options = nil)
@@ -92,7 +105,11 @@ module JSONRPC
 
     def method_missing(sym, *args, &block)
       if @alive
-        request = ::JSONRPC::Request.new(sym.to_s, args)
+        if @helper.named_params? && args.size == 1 && args.first.is_a?(::Hash)
+          request = ::JSONRPC::Request.new(sym.to_s, *args)
+        else
+          request = ::JSONRPC::Request.new(sym.to_s, args)
+        end
         push_batch_request(request)
       else
         super
@@ -142,7 +159,11 @@ module JSONRPC
 
   class Client < Base
     def method_missing(method, *args, &block)
-      invoke(method, args)
+      if @helper.named_params? && args.size == 1 && args.first.is_a?(::Hash)
+        invoke(method, *args)
+      else
+        invoke(method, args)
+      end
     end
 
     def invoke(method, args, options = nil)
